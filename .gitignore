@@ -1,0 +1,8 @@
+target/
+upstream/
+*.pdb
+*.exe
+!wslg-rs.exe
+!wslg-cosmic-hypr.exe
+.DS_Store
+Thumbs.db

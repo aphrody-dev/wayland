@@ -1,0 +1,25 @@
+[package]
+name = "wslg-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "wslg-rs"
+path = "src/main.rs"
+
+[[bin]]
+name = "wslg-cosmic-hypr"
+path = "src/bin/wslg_cosmic_hypr.rs"
+
+[dependencies]
+dx12-winui-core = { path = "../dx12-winui-core" }
+smithay-wayland-wire = { path = "../smithay-wayland-wire" }
+hypr-tiler = { path = "../hypr-tiler" }
+cosmic-compat = { path = "../cosmic-compat" }
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+windows.workspace = true

@@ -1,0 +1,13 @@
+[package]
+name = "smithay-wayland-wire"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+dx12-winui-core = { path = "../dx12-winui-core" }
+byteorder.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+windows.workspace = true
