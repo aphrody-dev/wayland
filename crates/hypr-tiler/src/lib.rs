@@ -2,6 +2,7 @@ pub mod animation;
 pub mod dwindle;
 pub mod geometry;
 pub mod master_stack;
+pub mod omarchy;
 pub mod rules;
 pub mod window;
 pub mod workspace;
@@ -10,6 +11,10 @@ pub use animation::{Spring1D, SpringParams, WindowGeometryAnimator};
 pub use dwindle::{BspNode, DwindleTree, SplitDirection};
 pub use geometry::{BorderConfig, GapsConfig, WindowRect};
 pub use master_stack::MasterStackLayout;
+pub use omarchy::{
+    DxgDamageRegion, DxgDmaBufDamageTracker, DxgSurfaceDamageState, OmarchyAction, OmarchyKeybind,
+    OmarchyKeybindRegistry,
+};
 pub use rules::{WindowRuleAction, WindowRuleV2, WindowRulesEngine};
 pub use window::{HyprWindow, WindowState};
 pub use workspace::Workspace;
@@ -123,5 +128,66 @@ mod tests {
         assert!((final_rect.y - target.y).abs() < 1.0);
         assert!((final_rect.width - target.width).abs() < 1.0);
         assert!((final_rect.height - target.height).abs() < 1.0);
+    }
+
+    #[test]
+    fn test_omarchy_keybindings_and_dxg_dmabuf_damage_coalescing() {
+        let mut reg = OmarchyKeybindRegistry::new("tokyo-night");
+        assert_eq!(reg.resolve("Super + Space"), Some(&OmarchyAction::LaunchMenuRoot));
+        assert_eq!(reg.resolve("Super + K"), Some(&OmarchyAction::ShowKeybindHud));
+        assert_eq!(
+            reg.resolve("Super + Return"),
+            Some(&OmarchyAction::SpawnTerminal("ghostty".into()))
+        );
+        assert_eq!(reg.resolve("Super + W"), Some(&OmarchyAction::CloseActiveWindow));
+        for ws in 1..=9u8 {
+            assert_eq!(
+                reg.resolve(&format!("Super + {}", ws)),
+                Some(&OmarchyAction::FocusWorkspace(ws))
+            );
+        }
+        assert_eq!(
+            reg.resolve("Super + Shift + T"),
+            Some(&OmarchyAction::LiveSwitchAetherTheme("tokyo-night".into()))
+        );
+
+        reg.switch_theme("catppuccin");
+        assert_eq!(
+            reg.resolve("Super + Shift + T"),
+            Some(&OmarchyAction::LiveSwitchAetherTheme("catppuccin".into()))
+        );
+
+        let conf = reg.to_hyprland_conf();
+        assert!(conf.contains("omarchy-menu"));
+        assert!(conf.contains("omarchy-wsl themes export catppuccin"));
+
+        let mut tracker = DxgDmaBufDamageTracker::new();
+        assert_eq!(tracker.dxg_device_node, "/dev/dxg");
+        tracker.register_surface(42, 0xDEAD_BEEF, 0x1234);
+        tracker.record_damage(
+            42,
+            DxgDamageRegion {
+                x: 10,
+                y: 20,
+                width: 100,
+                height: 50,
+            },
+        );
+        tracker.record_damage(
+            42,
+            DxgDamageRegion {
+                x: 80,
+                y: 40,
+                width: 120,
+                height: 60,
+            },
+        );
+        let coalesced = tracker.drain_coalesced_damage(42).unwrap();
+        assert_eq!(coalesced.x, 10);
+        assert_eq!(coalesced.y, 20);
+        assert_eq!(coalesced.width, 190);
+        assert_eq!(coalesced.height, 80);
+        assert_eq!(tracker.surfaces.get(&42).unwrap().committed_frames, 1);
+        assert!(tracker.drain_coalesced_damage(42).is_none());
     }
 }

@@ -19,6 +19,8 @@ smithay-wayland-wire = { path = "../smithay-wayland-wire" }
 hypr-tiler = { path = "../hypr-tiler" }
 cosmic-compat = { path = "../cosmic-compat" }
 clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 thiserror.workspace = true

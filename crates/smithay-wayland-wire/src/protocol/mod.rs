@@ -31,6 +31,11 @@ pub const INTERFACE_WP_FRACTIONAL_SCALE_V1: &str = "wp_fractional_scale_v1";
 pub const INTERFACE_ZWP_LINUX_DMABUF_V1: &str = "zwp_linux_dmabuf_v1";
 pub const INTERFACE_ZWP_LINUX_BUFFER_PARAMS_V1: &str = "zwp_linux_buffer_params_v1";
 
+// Ext Workspace Management Protocol (COSMIC + Hyprland + Omarchy bar workspace sync)
+pub const INTERFACE_EXT_WORKSPACE_MANAGER_V1: &str = "ext_workspace_manager_v1";
+pub const INTERFACE_EXT_WORKSPACE_GROUP_HANDLE_V1: &str = "ext_workspace_group_handle_v1";
+pub const INTERFACE_EXT_WORKSPACE_HANDLE_V1: &str = "ext_workspace_handle_v1";
+
 // Opcodes: wl_display
 pub mod display {
     pub const REQ_SYNC: u16 = 0;

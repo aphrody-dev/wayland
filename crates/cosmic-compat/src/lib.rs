@@ -1,12 +1,14 @@
+pub mod hidpi_protocols;
 pub mod layer_shell;
 pub mod session;
 pub mod theme;
 pub mod toplevel_manager;
 pub mod workspace_manager;
 
+pub use hidpi_protocols::{WslgHiDpiScalingDescriptor, WslgProtocolDescriptor};
 pub use layer_shell::{LayerAnchor, LayerShellManager, LayerSurface, LayerType};
 pub use session::CosmicSessionEnvironment;
-pub use theme::{CosmicColorRgba, CosmicTheme};
+pub use theme::{CosmicColorRgba, CosmicTheme, OmarchyPaletteBridge};
 pub use toplevel_manager::{CosmicToplevelInfo, CosmicToplevelManager};
 pub use workspace_manager::{CosmicWorkspaceInfo, CosmicWorkspaceManager};
 
@@ -80,5 +82,42 @@ mod tests {
         assert!(strings.contains(&"WGPU_BACKEND=vulkan".to_string()));
         assert!(strings.contains(&"COSMIC_DATA_CONTROL_ENABLED=1".to_string()));
         assert!(strings.contains(&"XDG_CURRENT_DESKTOP=COSMIC".to_string()));
+    }
+
+    #[test]
+    fn test_omarchy_palette_bridge_and_wslg_fractional_hidpi_protocols() {
+        let palette = OmarchyPaletteBridge::preset("tokyo-night");
+        let cosmic_theme = CosmicTheme::from_omarchy_palette(&palette);
+        assert_eq!(cosmic_theme.name, "Omarchy Aether - tokyo-night");
+        assert!(cosmic_theme.is_dark);
+        let ron = cosmic_theme.to_ron_string();
+        assert!(ron.contains("Omarchy Aether - tokyo-night"));
+
+        let latte = OmarchyPaletteBridge::preset("catppuccin-latte");
+        let latte_theme = CosmicTheme::from_omarchy_palette(&latte);
+        assert!(!latte_theme.is_dark);
+
+        let hidpi = WslgHiDpiScalingDescriptor::from_windows_dpi(3840, 2160, 144); // 150% Windows 11 scale
+        assert_eq!(hidpi.scale_factor_120ths, 180);
+        assert_eq!(hidpi.logical_width, 2560);
+        assert_eq!(hidpi.logical_height, 1440);
+        assert!(hidpi.zero_blur_pixel_exact);
+        assert_eq!(hidpi.protocols.len(), 4);
+        assert!(hidpi
+            .protocols
+            .iter()
+            .any(|p| p.interface == "ext_workspace_manager_v1"));
+        assert!(hidpi
+            .protocols
+            .iter()
+            .any(|p| p.interface == "zwp_linux_dmabuf_v1"));
+        assert!(hidpi
+            .protocols
+            .iter()
+            .any(|p| p.interface == "wp_fractional_scale_v1"));
+        assert!(hidpi
+            .protocols
+            .iter()
+            .any(|p| p.interface == "wp_viewporter"));
     }
 }

@@ -42,6 +42,7 @@ impl WaylandCompositor {
         compositor.register_global(proto::INTERFACE_WL_OUTPUT, 4);
         compositor.register_global(proto::INTERFACE_WP_FRACTIONAL_SCALE_MANAGER_V1, 1);
         compositor.register_global(proto::INTERFACE_WP_VIEWPORTER, 1);
+        compositor.register_global(proto::INTERFACE_EXT_WORKSPACE_MANAGER_V1, 1);
 
         compositor
     }

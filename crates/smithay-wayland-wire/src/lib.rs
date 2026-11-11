@@ -52,14 +52,14 @@ mod tests {
         );
         compositor.dispatch(req_registry, &mut transport).unwrap();
 
-        // Server should advertise all 9 globals to client
+        // Server should advertise all 10 globals to client
         let mut advertised = 0;
         while let Some(msg) = transport.server_to_client.pop_front() {
             assert_eq!(msg.sender_id, 2); // sent to registry id 2
             assert_eq!(msg.opcode, proto::registry::EVT_GLOBAL);
             advertised += 1;
         }
-        assert_eq!(advertised, 9);
+        assert_eq!(advertised, 10);
 
         // Client binds wl_compositor (global 1 -> id 3)
         let bind_compositor = WaylandMessage::new(
